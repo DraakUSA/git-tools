@@ -1,31 +1,8 @@
 #!/usr/bin/perl
 
-our $VERSION = 0.1.0;
+use FindBin qw/ $Bin /;
+use lib "$Bin/../lib";
 
-my $fetch;
-my $prune;
-my $remote_map;
+use GitUp;
 
-$config->{fetch.all} = 1;
-run(@ARGV);
-
-sub run {
-    my (@args) = @_;
-    
-    $fetch = 1;
-    
-    #process_args(@args);
-    
-    if ($fetch) {
-        @command = qw/ git fetch --multiple /;
-        push @command, qw/ --prune / if $prune;
-        push @command, $config->{fetch.all} ? qw/ --all / : @remotes;
-        
-        system(@command);
-        die "`git fetch` failed\n" if $?;
-    }
-    
-    $remote_map = undef;
-    
-    
-}
+GitUp->new()->run(@ARGV);
