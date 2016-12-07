@@ -38,8 +38,6 @@ sub run {
         $this->{remote_map} = undef;
 
         $this->with_stash(sub {$this->returning_to_current_branch(sub {$this->rebase_all_branches()})});
-
-        $me->check_bundler();
     };
     if (my $e = $@) {
         if (blessed($e) && $e->isa("GitError")) {
@@ -205,12 +203,6 @@ sub rebase {
     print "TBC: rebase\n";
 }
 
-sub check_bundler {
-    my ($this, $proc) = @_;
-
-    print "TBC: check_bundler\n";
-}
-
 sub is_fast_forward {
     my ($this, $proc) = @_;
 
@@ -233,22 +225,22 @@ sub on_branch {
 # private methods
 #-----------------------------------------------------------------------
 
-sub _use_bundler {
-    my ($this, $proc) = @_;
-
-    print "TBC: _use_bundler\n";
-}
-
-sub _use_bundler_config {
-    my ($this, $proc) = @_;
-
-    print "TBC: _use_bundler_config\n";
-}
-
 sub _prune {
     my ($this, $proc) = @_;
 
-    print "TBC: _prune\n";
+    my $required_version = "1.6.6";
+    my $config_value = $this->_config("fetch.prune") eq 'true';
+
+    if ($this->_git_version_at_least($required_version)) {
+        return $config_value;
+    }
+    else {
+        if ($config_value) {
+            print color('yellow')."Warning: fetch.prune is set to 'true' but your git version doesn't seem to support it (".$this->_git_version()." < ${required_version}). Defaulting to 'false'.".color('reset')."\n";
+        }
+
+        return '';
+    }
 }
 
 sub _change_count {
@@ -259,21 +251,43 @@ sub _change_count {
 }
 
 sub _config {
-    my ($this, $proc) = @_;
+    my ($this, $key) = @_;
 
-    print "TBC: _config\n";
+    my @config = `git config --list`;
+    my %config = ();
+    map {
+        my ($key, $val) = split /=/, $_, 2;
+        $config{$key} = $val;
+    } @config;
+    
+    return $config{"git-up.$key"};
 }
 
 sub _git_version_at_least {
-    my ($this, $proc) = @_;
+    my ($this, $required_version) = @_;
 
-    print "TBC: _git_version_at_least\n";
+    my @a = $this->_version_array($required_version);
+    my @b = $this->_version_array($this->_git_version());
+    
+    my $len_a = scalar @a;
+    my $len_b = scalar @b;
+    
+    my $len = $len_a > $len_b ? $len_a : $len_b;
+    
+    for (my $idx=0; $idx<$len; $idx++) {
+        next if $a[$idx] == $b[$idx];
+        
+        return $a[$idx] < $b[$idx];
+    }
+    
+    return $a[$idx] <= $b[$idx];
+    
 }
 
 sub _version_array {
-    my ($this, $proc) = @_;
+    my ($this, $version_string) = @_;
 
-    print "TBC: _version_array\n";
+    return split /\./, $version_string;
 }
 
 sub _git_version {
