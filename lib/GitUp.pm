@@ -3,6 +3,7 @@ package GitUp;
 our $VERSION = 0.1.0;
 
 use Carp;
+use GitError;
 use Scalar::Util "blessed";
 use Term::ANSIColor;
 
@@ -38,7 +39,7 @@ sub run {
 
         $this->with_stash(sub {$this->returning_to_current_branch(sub {$this->rebase_all_branches()})});
 
-        #check_bundler
+        $me->check_bundler();
     };
     if (my $e = $@) {
         if (blessed($e) && $e->isa("GitError")) {
@@ -105,40 +106,10 @@ BANNER
     }
 }
 
-sub with_stash {
+sub rebase_all_branches {
     my ($this, $proc) = @_;
 
-    my $stashed = 0;
-
-    if ($this->change_count() > 0) {
-        print color('magenta') . "stashing " . $this->{change_count} . " change(s)". color('reset') . "\n";
-        `git stash`;
-        $stashed = true
-    }
-
-    $proc->();
-
-    if ($stashed) {
-        print color('magenta') . "unstashing" . color('reset') . "\n";
-        `git stash pop`;
-    }
-}
-
-sub change_count {
-    my ($this) = @_;
-
-    my @status = `git status --porcelain --untracked=no`;
-    return $this->{change_count} = 0 || scalar(@status);
-}
-
-sub returning_to_current_branch {
-    my ($this, $proc) = @_;
-
-    print "returning_to_current_branch\n";
-
-    $proc->();
-
-    print "returning_to_current_branch\n";
+    print "TBC: rebase_all_branches\n";
 }
 
 sub repo {
@@ -163,53 +134,157 @@ sub get_repo {
     }
 }
 
-sub rebase_all_branches {
+sub branches {
     my ($this, $proc) = @_;
 
-    print "rebase_all_branches\n";
+    print "TBC: branches\n";
+}
 
+sub remotes {
+    my ($this, $proc) = @_;
+
+    print "TBC: remotes\n";
+}
+
+sub remote_map {
+    my ($this, $proc) = @_;
+
+    print "TBC: remote_map\n";
+}
+
+sub remote_for_branch {
+    my ($this, $proc) = @_;
+
+    print "TBC: remote_for_branch\n";
+}
+
+sub with_stash {
+    my ($this, $proc) = @_;
+
+    my $stashed = 0;
+
+    if ($this->_change_count() > 0) {
+        print color('magenta') . "stashing " . $this->{change_count} . " change(s)". color('reset') . "\n";
+        `git stash`;
+        $stashed = true
+    }
+
+    $proc->();
+
+    if ($stashed) {
+        print color('magenta') . "unstashing" . color('reset') . "\n";
+        `git stash pop`;
+    }
+}
+
+sub returning_to_current_branch {
+    my ($this, $proc) = @_;
+
+    print "TBC: returning_to_current_branch\n";
+
+    $proc->();
+
+    print "TBC: returning_to_current_branch\n";
+}
+
+sub checkout {
+    my ($this, $proc) = @_;
+
+    print "TBC: checkout\n";
+}
+
+sub log {
+    my ($this, $proc) = @_;
+
+    print "TBC: log\n";
+}
+
+sub rebase {
+    my ($this, $proc) = @_;
+
+    print "TBC: rebase\n";
+}
+
+sub check_bundler {
+    my ($this, $proc) = @_;
+
+    print "TBC: check_bundler\n";
+}
+
+sub is_fast_forward {
+    my ($this, $proc) = @_;
+
+    print "TBC: is_fast_forward\n";
+}
+
+sub merge_base {
+    my ($this, $proc) = @_;
+
+    print "TBC: merge_base\n";
+}
+
+sub on_branch {
+    my ($this, $proc) = @_;
+
+    print "TBC: on_branch\n";
 }
 
 #-----------------------------------------------------------------------
 # private methods
 #-----------------------------------------------------------------------
 
+sub _use_bundler {
+    my ($this, $proc) = @_;
+
+    print "TBC: _use_bundler\n";
+}
+
+sub _use_bundler_config {
+    my ($this, $proc) = @_;
+
+    print "TBC: _use_bundler_config\n";
+}
+
 sub _prune {
-    1;
+    my ($this, $proc) = @_;
+
+    print "TBC: _prune\n";
 }
 
-package GitError;
-
-use Term::ANSIColor;
-
-sub new {
-    my ($this, @args) = @_;
-
-    my $obj = {};
-    bless $obj, $this;
-
-    $obj->initialize(@args);
-
-    return $obj;
-}
-
-sub initialize {
-    my ($this, $message, $output) = @_;
-
-    $this->{msg} = color('red') . $message . color('reset');
-
-    if ($output) {
-        $this->{msg} .= "\n";
-        $this->{msg} .= color('red') . "Here's what Git said:" . color('reset');
-        $this->{msg} .= "\n";
-        $this->{msg} .= $output;
-    }
-}
-
-sub message {
+sub _change_count {
     my ($this) = @_;
 
-    return $this->{msg};
+    my @status = `git status --porcelain --untracked=no`;
+    return $this->{change_count} = 0 || scalar(@status);
+}
+
+sub _config {
+    my ($this, $proc) = @_;
+
+    print "TBC: _config\n";
+}
+
+sub _git_version_at_least {
+    my ($this, $proc) = @_;
+
+    print "TBC: _git_version_at_least\n";
+}
+
+sub _version_array {
+    my ($this, $proc) = @_;
+
+    print "TBC: _version_array\n";
+}
+
+sub _git_version {
+    my ($this) = @_;
+
+    my $vers_str = `git --version`;
+    chomp $vers_str;
+    $vers_str =~ /(\d+(\.\d+)+)/;
+    $vers_str = $1;
+    
+    return $vers_str;
 }
 
 1;
