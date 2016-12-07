@@ -3,9 +3,11 @@ package GitUp;
 our $VERSION = 0.1.0;
 
 use Carp;
-use GitError;
 use Scalar::Util "blessed";
 use Term::ANSIColor;
+
+use GitError;
+use Repo;
 
 my $config = {};
 
@@ -125,7 +127,7 @@ sub get_repo {
 
     if ($err == 0) {
         chdir $repo_dir;
-        #$this->{repo} = Grit::Repo.new(repo_dir)
+        $this->{repo} = Repo.new($repo_dir)
     }
     else {
         confess GitError->new("We don't seem to be in a git repository.");
@@ -135,25 +137,25 @@ sub get_repo {
 sub branches {
     my ($this, $proc) = @_;
 
-    print "TBC: branches\n";
+    warn "TBC: branches";
 }
 
 sub remotes {
     my ($this, $proc) = @_;
 
-    print "TBC: remotes\n";
+    warn "TBC: remotes";
 }
 
 sub remote_map {
     my ($this, $proc) = @_;
 
-    print "TBC: remote_map\n";
+    warn "TBC: remote_map";
 }
 
 sub remote_for_branch {
     my ($this, $proc) = @_;
 
-    print "TBC: remote_for_branch\n";
+    warn "TBC: remote_for_branch";
 }
 
 sub with_stash {
@@ -163,7 +165,8 @@ sub with_stash {
 
     if ($this->_change_count() > 0) {
         print color('magenta') . "stashing " . $this->{change_count} . " change(s)". color('reset') . "\n";
-        `git stash`;
+        warn "XXX: stash";
+        #`git stash`;
         $stashed = true
     }
 
@@ -171,54 +174,55 @@ sub with_stash {
 
     if ($stashed) {
         print color('magenta') . "unstashing" . color('reset') . "\n";
-        `git stash pop`;
+        warn "XXX: stash pop";
+        #`git stash pop`;
     }
 }
 
 sub returning_to_current_branch {
     my ($this, $proc) = @_;
 
-    print "TBC: returning_to_current_branch\n";
+    warn "TBC: returning_to_current_branch";
 
     $proc->();
 
-    print "TBC: returning_to_current_branch\n";
+    warn "TBC: returning_to_current_branch";
 }
 
 sub checkout {
     my ($this, $proc) = @_;
 
-    print "TBC: checkout\n";
+    warn "TBC: checkout";
 }
 
 sub log {
     my ($this, $proc) = @_;
 
-    print "TBC: log\n";
+    warn "TBC: log";
 }
 
 sub rebase {
     my ($this, $proc) = @_;
 
-    print "TBC: rebase\n";
+    warn "TBC: rebase";
 }
 
 sub is_fast_forward {
     my ($this, $proc) = @_;
 
-    print "TBC: is_fast_forward\n";
+    warn "TBC: is_fast_forward";
 }
 
 sub merge_base {
     my ($this, $proc) = @_;
 
-    print "TBC: merge_base\n";
+    warn "TBC: merge_base";
 }
 
 sub on_branch {
     my ($this, $proc) = @_;
 
-    print "TBC: on_branch\n";
+    warn "TBC: on_branch";
 }
 
 #-----------------------------------------------------------------------
