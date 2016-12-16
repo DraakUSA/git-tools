@@ -1,4 +1,4 @@
-package GitError;
+package Exception;
 
 use Term::ANSIColor;
 
@@ -14,16 +14,9 @@ sub new {
 }
 
 sub initialize {
-    my ($this, $message, $output) = @_;
+    my ($this, $message) = @_;
 
     $this->{msg} = color('red') . $message . color('reset');
-
-    if ($output) {
-        $this->{msg} .= "\n";
-        $this->{msg} .= color('red') . "Here's what Git said:" . color('reset');
-        $this->{msg} .= "\n";
-        $this->{msg} .= $output;
-    }
 }
 
 sub message {

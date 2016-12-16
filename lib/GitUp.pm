@@ -3,10 +3,11 @@ package GitUp;
 our $VERSION = 0.1.0;
 
 use Carp;
+use List::Util;
 use Scalar::Util "blessed";
 use Term::ANSIColor;
 
-use GitError;
+use Exception::GitError;
 use Repo;
 
 my $config = {};
@@ -34,7 +35,7 @@ sub run {
             push @command, $config->{fetch.all} ? qw/ --all / : @{$this->{remotes}};
 
             system(@command);
-            confess GitError->new("`git fetch` failed") if $?;
+            confess Exception::GitError->new("`git fetch` failed") if $?;
         }
 
         $this->{remote_map} = undef;
@@ -42,7 +43,7 @@ sub run {
         $this->with_stash(sub {$this->returning_to_current_branch(sub {$this->rebase_all_branches()})});
     };
     if (my $e = $@) {
-        if (blessed($e) && $e->isa("GitError")) {
+        if (blessed($e) && $e->isa("Exception::GitError")) {
             print $e->message(), "\n";
             exit(1);
         }
@@ -109,7 +110,10 @@ BANNER
 sub rebase_all_branches {
     my ($this, $proc) = @_;
 
-    print "TBC: rebase_all_branches\n";
+    my $col_width = List::Util::max(map { $b = $_; len($b->{name}); } $this->branches());
+    foreach my $branch ($this->branches()) {
+        print "TBC: rebase_all_branches ($branch)\n";
+    }
 }
 
 sub repo {
@@ -130,14 +134,17 @@ sub get_repo {
         $this->{repo} = Repo.new($repo_dir)
     }
     else {
-        confess GitError->new("We don't seem to be in a git repository.");
+        confess Exception::GitError->new("We don't seem to be in a git repository");
     }
 }
 
 sub branches {
     my ($this, $proc) = @_;
 
+    $this->{branches} ||= $this->repo()->branches();
     warn "TBC: branches";
+    
+    return $this->{branches};
 }
 
 sub remotes {
